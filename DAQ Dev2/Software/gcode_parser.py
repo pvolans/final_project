@@ -26,11 +26,11 @@ def gcode_parser(file_name):
             if not line or line.startswith(";"):  # Skip empty lines and comments
                 continue
 
-            parsed_line = line.split(";")[0].strip()
+            parsed_line = line.split(";")[0].strip() # Add only GCODE commands, do not take the element after ";"  
             if not parsed_line:
                 continue
 
-            if parsed_line:  # Only print if valid
+            if parsed_line:  # Only print and append if it is valid
                 print(parsed_line)
                 gcode_data.append(parsed_line)
 
