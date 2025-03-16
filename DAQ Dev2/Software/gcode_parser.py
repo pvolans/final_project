@@ -10,7 +10,7 @@
 
 import os
 
-def parse_gcode(file_name):
+def gcode_parser(file_name):
     # Define relative path to GCODE folder
     gcode_folder = "GCODE"
     file_path = os.path.join(gcode_folder, file_name)
@@ -38,7 +38,7 @@ def parse_gcode(file_name):
 
 
 # Example usage
-gcode_data = parse_gcode("sampling_by_3D_printer.gcode")  
+gcode_data = gcode_parser("sampling_by_3D_printer.gcode")  
 print(gcode_data[114])
 
 
