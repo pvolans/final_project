@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+
+"""gcode_parser.py: gcode_parser description takes GCODE file path and convert it into list.
+
+    This function takes the file name which is inside of GCODE folder as a parameter and convert each line of
+    meaningful GCODE command into list.
+
+    An example is given below.    
+"""
+
 import os
 
 def parse_gcode(file_name):
