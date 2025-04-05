@@ -1,8 +1,9 @@
 import list_uart_ports
 import math
 import random
-#import csv
-#from datetime import datetime
+import time
+import csv
+from datetime import datetime
 #import os
 import gcode_parser 
 
@@ -37,6 +38,10 @@ class win(QMainWindow):
         self.LASER_2_ser = None
         self.ROBOT_ser = None
         self.isStarting = True
+        self.isLaserON = True
+
+        self.point = 0 
+        self.sample = 0
 
         self.ports = list_uart_ports.list_uart_ports()
         for port in self.ports:
@@ -141,6 +146,7 @@ class win(QMainWindow):
 
 
     def run_gcode(self):
+        # self.LASER_2_PORT.write(b'L') # Disable LASER_2
 
         if self.isStarting:
             self.qtWindow.label_Status.setText("Starting to sample")
@@ -150,12 +156,62 @@ class win(QMainWindow):
 
             for gcode_command in self.gcode_line:
                 self.qtWindow.label_Command.setText(gcode_command)
-                print(gcode_command)
+                first_word = gcode_command.split()[0]
+
+                if first_word == "M4": # Turn the laser ON
+                    self.isLaserON = True
+                    # self.LASER_1_PORT.write(b'E') # Enable LASER_1
+
+                elif first_word == "M5": # Turn the laser OFF
+                    self.qtWindow.label_Command.setText("Sampling without Laser")
+                    self.isLaserON = False
+                    # self.LASER_1_PORT.write(b'L') # Disable LASER_1
+
+                elif first_word == "M0": # Pause after the last movement and sample
+                    print("Stop and wait")    
+                    self.point = self.point + 1 
+                    while len(data_entries) < DATA_LIMIT:
+                        if self.LASER_1_PORT.in_waiting:
+                            # Read a line of incoming data
+                            line = self.LASER_1_PORT.readline().decode('utf-8').strip()
+                            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+                            angle = self.getAngle()
+                            # Split the line and extract numerical values
+                            parts = line.split(';')
+                            numerical_values = [parts[i].replace('[', '').replace(']', '') for i in range(1, len(parts), 2)]
+                            data_entries.append(numerical_values + [timestamp, angle])
+
+                    if self.isLaserON:
+                        self.qtWindow.label_Status.setText("Sampling with Laser")
+                        file_name = f"data_{self.sample}_{self.point}_L.csv"     
+
+                    else:
+                        self.qtWindow.label_Status.setText("Sampling without Laser")
+                        file_name = f"data_{self.sample}_{self.point}.csv"      
+
+                    # Save data to a CSV file
+                    with open(file_name, 'w', newline='') as file:
+                        writer = csv.writer(file)
+                        writer.writerow(["DIST", "AMP", "TEMP", "VOLT","Timestamp","Angle"])
+                        writer.writerows(data_entries)
+
+                        print(f"Saved {len(data_entries)} entries to {file_name}.")
+                        data_entries = []
+
+
+
+
+
+
         else:
             self.qtWindow.label_Status.setText("Stoped to sample")
             self.qtWindow.pushButton_start.setText("Start")
             self.qtWindow.pushButton_import_GCODE.setEnabled(True)
             self.isStarting = True
+
+            """
+            self.ROBOT_PORT.write(b'G28')
+            """
 
 
 
