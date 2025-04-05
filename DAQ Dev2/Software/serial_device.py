@@ -1,5 +1,6 @@
 import serial
 from PyQt5.QtCore import QThread, pyqtSignal
+import queue
 
 class serial_device(QThread):
     data_received = pyqtSignal(str)
@@ -10,6 +11,7 @@ class serial_device(QThread):
         self.baudrate = baudrate
         self._running = True
         self.ser = None
+        self.queue = queue.Queue()
 
     def run(self):
         self.ser = serial.Serial(self.port_name, self.baudrate, timeout=0.1)
@@ -17,7 +19,8 @@ class serial_device(QThread):
             if self.ser.in_waiting:
                 data = self.ser.readline().decode().strip()
                 if data:
-                    self.data_received.emit(data)
+                    self.queue.put(data)
+                    self.data_received.emit()
 
     def send(self, msg):
         if self.ser and self.ser.is_open:
