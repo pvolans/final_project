@@ -15,6 +15,8 @@ LASER_BAUD_RATE = 256000
 DATA_LIMIT = 4000  # Maximum number of data entries
 ROBOT_BAUD_RATE = 115200
 
+CALIBRATION_TIME = 1000 # 13000
+
 class win(QMainWindow):
     def __init__(self)->None:
         super().__init__()
@@ -34,6 +36,7 @@ class win(QMainWindow):
         self.LASER_1_ser = None
         self.LASER_2_ser = None
         self.ROBOT_ser = None
+        self.isStarting = True
 
         self.ports = list_uart_ports.list_uart_ports()
         for port in self.ports:
@@ -80,7 +83,7 @@ class win(QMainWindow):
 
         """self.LASER_1_PORT.write(b'C')  
         self.LASER_2_PORT.write(b'C')    """   
-        QTimer.singleShot(13000, self.calibration_finish)
+        QTimer.singleShot(CALIBRATION_TIME, self.calibration_finish)
 
     def calibration_finish (self):
         self.qtWindow.label_Status.setText("Calibration was completed!")
@@ -138,8 +141,25 @@ class win(QMainWindow):
 
 
     def run_gcode(self):
-        for gcode_command in self.gcode_line:
-            print(gcode_command)
+
+        if self.isStarting:
+            self.qtWindow.label_Status.setText("Starting to sample")
+            self.qtWindow.pushButton_start.setText("Stop")
+            self.qtWindow.pushButton_import_GCODE.setEnabled(False)
+            self.isStarting = False
+
+            for gcode_command in self.gcode_line:
+                self.qtWindow.label_Command.setText(gcode_command)
+                print(gcode_command)
+        else:
+            self.qtWindow.label_Status.setText("Stoped to sample")
+            self.qtWindow.pushButton_start.setText("Start")
+            self.qtWindow.pushButton_import_GCODE.setEnabled(True)
+            self.isStarting = True
+
+
+
+
 
              
 
