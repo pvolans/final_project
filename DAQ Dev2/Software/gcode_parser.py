@@ -5,7 +5,11 @@
     This function takes the file name which is inside of GCODE folder as a parameter and convert each line of
     meaningful GCODE command into list.
 
-    An example is given below.    
+    An example is given below.  
+
+    # Example usage
+    gcode_data = gcode_parser("sampling_by_3D_printer.gcode")  
+    print(gcode_data[114])  
 """
 
 import os
@@ -31,15 +35,13 @@ def gcode_parser(file_name):
                 continue
 
             if parsed_line:  # Only print and append if it is valid
-                print(parsed_line)
+                #print(parsed_line)
                 gcode_data.append(parsed_line)
 
     return gcode_data
 
 
-# Example usage
-gcode_data = gcode_parser("sampling_by_3D_printer.gcode")  
-print(gcode_data[114])
+
 
 
 

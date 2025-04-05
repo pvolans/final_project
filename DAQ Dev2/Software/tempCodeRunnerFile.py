@@ -1,4 +1,1 @@
-    app = QApplication([])
-    window = main()
-    window.show()
-    app.exec()
+115200
