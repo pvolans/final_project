@@ -5,7 +5,7 @@ from datetime import datetime
 import os
 
 # Configuration
-PORT = '/dev/ttyUSB0'  # Replace with your serial port
+PORT = 'COM7'  # Replace with your serial port
 BAUD_RATE = 256000
 DATA_LIMIT = 4000  # Maximum number of data entries
 WAIT_TIME_TWO_SAMPLE = 2
@@ -37,7 +37,7 @@ def main():
             else:
                 print("Invalid input. Please press 'S' to start.")
         point = 0
-        sample = 0
+        sample = 3
         data_entries = []
 
         while True:
@@ -57,7 +57,7 @@ def main():
 
        
             # Save data to a CSV file
-            file_name = f"data_{sample_numbers[sample]}_{point}_L.csv"
+            file_name = f"wo_movement_test_data_{sample_numbers[sample]}_{point}_L.csv"
     
             with open(file_name, 'w', newline='') as file:
                 writer = csv.writer(file)
@@ -80,7 +80,7 @@ def main():
                     data_entries.append(numerical_values + [timestamp])
             
             # Save data to a CSV file
-            file_name = f"data_{sample_numbers[sample]}_{point}.csv"      
+            file_name = f"movement_test_data_{sample_numbers[sample]}_{point}.csv"      
                   
             with open(file_name, 'w', newline='') as file:
                 writer = csv.writer(file)
