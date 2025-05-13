@@ -89,30 +89,16 @@
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
              <widget class="QComboBox" name="comboBox_UART_Laser1">
-              <item>
-               <property name="text">
-                <string>/dev/ttyUSB0</string>
-               </property>
-              </item>
+              <property name="currentText">
+               <string/>
+              </property>
              </widget>
             </item>
             <item>
-             <widget class="QComboBox" name="comboBox_UART_Laser2">
-              <item>
-               <property name="text">
-                <string>/dev/ttyUSB1</string>
-               </property>
-              </item>
-             </widget>
+             <widget class="QComboBox" name="comboBox_UART_Laser2"/>
             </item>
             <item>
-             <widget class="QComboBox" name="comboBox_UART_Robot">
-              <item>
-               <property name="text">
-                <string>/dev/ttyUSB2</string>
-               </property>
-              </item>
-             </widget>
+             <widget class="QComboBox" name="comboBox_UART_Robot"/>
             </item>
            </layout>
           </item>
