@@ -1,11 +1,15 @@
 from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import QTimer
 import queue
 from laser_sampler import LaserSampler
+import time
 
 class GCodeRunner(QThread):
     gcode_status = pyqtSignal(str)
     gcode_position = pyqtSignal(str)
     finished = pyqtSignal()
+    progress = pyqtSignal(int)  
+
 
     def __init__(self, gcode_lines, laser_ser, robot_ser, parent=None):
         super().__init__(parent)
@@ -14,28 +18,46 @@ class GCodeRunner(QThread):
         self.robot_ser = robot_ser
         self._running = True
 
+        self._idle = False
+        self._ok = False
+
+        self.idle_timer = QTimer(self)
+        self.idle_timer.timeout.connect(self.wait_until_idle)
+
+        self.ok_timer = QTimer(self)
+        self.ok_timer.timeout.connect(self.wait_until_ok)
+
     def stop(self):
+        self.finished.emit()
         self._running = False
 
-    def wait_for_grbl_ok(self, timeout=2.0):
-        try:
-            while True:
-                response = self.robot_ser.queue.get(timeout=timeout)
+    def wait_until_ok(self, timeout=2.0):
+        """Non-blocking GRBL OK checker with timeout in seconds"""
+        end_time = time.time() + timeout
+        while time.time() < end_time:
+            if not self._running:
+                return False  # stop immediately if thread is asked to stop
+
+            try:
+                response = self.robot_ser.queue.get_nowait()
                 print(f"[GRBL] Response: {response}")
+
                 if response.strip() == "ok":
                     return True
                 elif response.startswith("error"):
                     print(f"[GRBL ERROR] {response}")
                     return False
-                
-        except queue.Empty:
-            print("[GRBL TIMEOUT] No response from GRBL")
-            return False     
-           
+            except queue.Empty:
+                time.sleep(0.01)  # yield control briefly to avoid busy-waiting
+
+
     def run(self):
-        for gcode_command in self.gcode_lines:
+        total_lines = len(self.gcode_lines)
+
+        for i, gcode_command in enumerate(self.gcode_lines):
             if not self._running:
                 break
+            
 
             first_word = gcode_command.split()[0]
 
@@ -54,11 +76,36 @@ class GCodeRunner(QThread):
                 self.robot_ser.send(gcode_command + '\n')
                 self.gcode_status.emit(gcode_command)
 
-                if not self.wait_for_grbl_ok():
-                    print("Aborting due to GRBL error")
+                self.ok_timer.start(100)                
+                if self._ok:
+                    self.ok_timer.stop()
+                    self._ok = False
+
+                    self.idle_timer.start(100)
+                    if not self._idle:
+                        self.idle_timer.stop()
+                        print("Aborting due to GRBL IDLE error")
+                        self._idle
+                        break
+                    self.idle_timer.stop()
+                    self._idle = False
+                else: 
+                    print("Aborting due to GRBL ok response error")
                     break
+            # Emit progress
+            progress_percent = int((i + 1) / total_lines * 100)
+            self.progress.emit(progress_percent)
             
-            self.gcode_position.emit(self.laser_ser.queue.get())
+            
+        self.stop()
+
+    def wait_until_idle(self):
+        self.robot_ser.send(b"?")
+        response = self.robot_ser.queue.get()
+        if response.startswith("<") and "Idle" in response:
+            self._idle = True
+        else:
+            self._idle = False
 
 
-        self.finished.emit()
+
