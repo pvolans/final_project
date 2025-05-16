@@ -6,13 +6,15 @@ import queue
 class serial_device(QThread):
     data_received = pyqtSignal(str)
 
-    def __init__(self, port_name, baudrate=115200):
+    def __init__(self, data_handler, port_name, baudrate=115200):
         super().__init__()
         self.port_name = port_name
         self.baudrate = baudrate
         self._running = True
         self.ser = None
         self.queue = queue.Queue()
+
+        self.data_received.connect(data_handler)
 
     def run(self):
         try:

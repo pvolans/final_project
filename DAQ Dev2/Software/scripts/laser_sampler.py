@@ -1,5 +1,5 @@
 from PyQt5.QtCore import QThread, pyqtSignal
-import time
+import datetime
 
 class LaserSampler(QThread):
     sample_ready = pyqtSignal(object)
