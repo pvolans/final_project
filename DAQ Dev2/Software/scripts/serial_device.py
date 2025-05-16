@@ -3,7 +3,7 @@ import serial
 from PyQt5.QtCore import QThread, QMutex, pyqtSignal
 import queue
 
-class serial_device(QThread):
+class SerialDevice(QThread):
     data_received = pyqtSignal(str)
 
     def __init__(self, data_handler, port_name, baudrate=115200):
