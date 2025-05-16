@@ -18,20 +18,11 @@ class GCodeRunner(QThread):
         self.robot_ser = robot_ser
         self._running = True
 
-        self._idle = False
-        self._ok = False
-
-        self.idle_timer = QTimer(self)
-        self.idle_timer.timeout.connect(self.wait_until_idle)
-
-        self.ok_timer = QTimer(self)
-        self.ok_timer.timeout.connect(self.wait_until_ok)
-
     def stop(self):
         self.finished.emit()
         self._running = False
 
-    def wait_until_ok(self, timeout=2.0):
+    def wait_for_grbl_ok(self, timeout=2.0):
         """Non-blocking GRBL OK checker with timeout in seconds"""
         end_time = time.time() + timeout
         while time.time() < end_time:
@@ -76,19 +67,10 @@ class GCodeRunner(QThread):
                 self.robot_ser.send(gcode_command + '\n')
                 self.gcode_status.emit(gcode_command)
 
-                self.ok_timer.start(100)                
-                if self._ok:
-                    self.ok_timer.stop()
-                    self._ok = False
-
-                    self.idle_timer.start(100)
-                    if not self._idle:
-                        self.idle_timer.stop()
+                if self.wait_for_grbl_ok():
+                    if not self.wait_until_idle():
                         print("Aborting due to GRBL IDLE error")
-                        self._idle
                         break
-                    self.idle_timer.stop()
-                    self._idle = False
                 else: 
                     print("Aborting due to GRBL ok response error")
                     break
@@ -99,13 +81,15 @@ class GCodeRunner(QThread):
             
         self.stop()
 
-    def wait_until_idle(self):
-        self.robot_ser.send(b"?")
-        response = self.robot_ser.queue.get()
-        if response.startswith("<") and "Idle" in response:
-            self._idle = True
-        else:
-            self._idle = False
+    def wait_until_idle(self, timeout=10):
+        start = time.time()
+        while time.time() - start < timeout:
+            self.robot_ser.send(b"?")
+            time.sleep(0.1)
+            response = self.robot_ser.queue.get()
+            if response.startswith("<") and "Idle" in response:
+                return True
+        return False
 
 
 
