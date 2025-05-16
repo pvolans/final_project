@@ -1,7 +1,6 @@
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtCore import QTimer
 import queue
-from laser_sampler import LaserSampler
 import time
 
 class GCodeRunner(QThread):
@@ -17,29 +16,11 @@ class GCodeRunner(QThread):
         self.laser_ser = laser_ser
         self.robot_ser = robot_ser
         self._running = True
+        self._ok = False
 
     def stop(self):
         self.finished.emit()
         self._running = False
-
-    def wait_for_grbl_ok(self, timeout=2.0):
-        """Non-blocking GRBL OK checker with timeout in seconds"""
-        end_time = time.time() + timeout
-        while time.time() < end_time:
-            if not self._running:
-                return False  # stop immediately if thread is asked to stop
-
-            try:
-                response = self.robot_ser.queue.get_nowait()
-                print(f"[GRBL] Response: {response}")
-
-                if response.strip() == "ok":
-                    return True
-                elif response.startswith("error"):
-                    print(f"[GRBL ERROR] {response}")
-                    return False
-            except queue.Empty:
-                time.sleep(0.01)  # yield control briefly to avoid busy-waiting
 
 
     def run(self):
@@ -62,12 +43,12 @@ class GCodeRunner(QThread):
                 self.gcode_status.emit("Sampling without Laser")
                 
 
-
             elif first_word == "G0":
                 self.robot_ser.send(gcode_command + '\n')
                 self.gcode_status.emit(gcode_command)
 
                 if self.wait_for_grbl_ok():
+
                     if not self.wait_until_idle():
                         print("Aborting due to GRBL IDLE error")
                         break
@@ -90,6 +71,25 @@ class GCodeRunner(QThread):
             if response.startswith("<") and "Idle" in response:
                 return True
         return False
+    
+    
+    def wait_for_grbl_ok(self, timeout=2.0):
+        """Non-blocking GRBL OK checker with timeout in seconds"""
+        end_time = time.time() + timeout
+        while time.time() < end_time:
+            if not self._running:
+                return False  # stop immediately if thread is asked to stop
 
+            try:
+                response = self.robot_ser.queue.get_nowait()
+                print(f"[GRBL] Response: {response}")
+
+                if response.strip() == "ok":
+                    return True
+                elif response.startswith("error"):
+                    print(f"[GRBL ERROR] {response}")
+                    return False
+            except queue.Empty:
+                time.sleep(0.01)  # yield control briefly to avoid busy-waiting
 
 
