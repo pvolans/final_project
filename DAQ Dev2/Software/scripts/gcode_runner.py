@@ -68,24 +68,31 @@ class GCodeRunner(QThread):
 
                 self.robot_ser.send(gcode_command + '\n')
 
-                if not self.wait_for_flag(lambda: self._ok, timeout=3000):
+                if not self.wait_for_flag(lambda: self._ok, timeout=3):
                     print("Timeout waiting for GRBL ok")
-                    # Wait for idle
 
-                if not self.wait_for_flag(lambda: self._idle, timeout=1000):
-                    print("Timeout waiting for GRBL idle")
-                    break
+                # if not self.wait_for_flag(lambda: self._run, timeout=10):
+                #     print("Timeout waiting for GRBL run")
 
+                # if not self.wait_for_flag(lambda: self._idle, timeout=10):
+                #     print("Timeout waiting for GRBL idle")
+                #     break
 
             elif first_word == "M4":
                 self.laser_ser.send(b'E')
                 self.gcode_status.emit("Sampling with Laser")
-              
 
             elif first_word == "M5":
                 self.laser_ser.send(b'L')
                 self.gcode_status.emit("Sampling without Laser")
 
+            elif first_word == "G4":
+                self.laser_ser.send(gcode_command + '\n')
+                if not self.wait_for_flag(lambda: self._ok, timeout=3):
+                    print("Timeout waiting for GRBL ok")
+            else:
+                self.laser_ser.send(gcode_command + '\n')
+                
             # Emit progress
             progress_percent = int((i + 1) / total_lines * 100)
             self.progress.emit(progress_percent)
@@ -100,5 +107,5 @@ class GCodeRunner(QThread):
             with QMutexLocker(self.mutex):
                 if check_fn():
                     return True
-            time.sleep(0.005)
+            time.sleep(0.01)
         return False

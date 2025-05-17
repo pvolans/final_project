@@ -126,7 +126,7 @@ class win(QMainWindow):
         
         self.qtWindow.label_Status.setText("Waiting for calibration ...")
 
-        self.LASER_1_ser.send(b'C')  
+        # self.LASER_1_ser.send(b'C')  
         # self.LASER_2_ser.send(b'C')
         QTimer.singleShot(CALIBRATION_TIME, self.calibration_finish)
 
@@ -192,10 +192,12 @@ class win(QMainWindow):
             self.qtWindow.label_Status.setText("Stopped sampling")
             self.qtWindow.pushButton_start.setText("Start")
             self.qtWindow.pushButton_import_GCODE.setEnabled(True)
-            self.ROBOT_ser.send(b'G0 X0 Y0')
             self.isStarting = True
             if hasattr(self, 'gcode_thread'):
                 self.gcode_thread.stop()
+
+            self.ROBOT_ser.send(b'G0 X0 Y0')
+
                 
 
     def LASER_1_data_handler(self):
