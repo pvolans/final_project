@@ -41,7 +41,7 @@
          </font>
         </property>
         <property name="text">
-         <string>00:10:05</string>
+         <string>00:00:00</string>
         </property>
        </widget>
       </item>
@@ -50,7 +50,7 @@
     <item>
      <widget class="QProgressBar" name="progressBar">
       <property name="value">
-       <number>2</number>
+       <number>0</number>
       </property>
      </widget>
     </item>

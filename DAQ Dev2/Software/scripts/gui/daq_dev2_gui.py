@@ -39,7 +39,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.addWidget(self.label_Timepassed)
         self.verticalLayout_5.addLayout(self.horizontalLayout_3)
         self.progressBar = QtWidgets.QProgressBar(self.centralwidget)
-        self.progressBar.setProperty("value", 2)
+        self.progressBar.setProperty("value", 0)
         self.progressBar.setObjectName("progressBar")
         self.verticalLayout_5.addWidget(self.progressBar)
         self.verticalLayout_4 = QtWidgets.QVBoxLayout()
@@ -186,7 +186,7 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "DAQ Dev II - GUI"))
         self.label_Timepassed_name.setText(_translate("MainWindow", "Time Passed"))
-        self.label_Timepassed.setText(_translate("MainWindow", "00:10:05"))
+        self.label_Timepassed.setText(_translate("MainWindow", "00:00:00"))
         self.label_Laser_1_name.setText(_translate("MainWindow", "Laser 1"))
         self.label_Laser_2_name.setText(_translate("MainWindow", "Laser 2"))
         self.label_Robot_name.setText(_translate("MainWindow", "Robot"))
