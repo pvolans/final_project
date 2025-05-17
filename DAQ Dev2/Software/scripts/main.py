@@ -12,7 +12,8 @@ from PyQt5.QtCore import QTimer
 
 #Serial devices
 import list_uart_ports as list_uart_ports
-from serial_device import serial_device
+from serial_device import SerialDevice
+from grbl_device import GRBLDevice
 import queue
 
 from gui.daq_dev2_gui import Ui_MainWindow
@@ -88,9 +89,10 @@ class win(QMainWindow):
         #Connecting the Serial Ports
         if self.LASER_1_PORT and self.LASER_2_PORT and self.ROBOT_PORT:
 
-            self.LASER_1_ser = serial_device(data_handler=self.LASER_1_data_handler, port_name=self.LASER_1_PORT, baudrate=LASER_BAUD_RATE)
-            #self.LASER_2_ser = serial_device(data_handler=self.LASER_2_data_handler, port_name=self.LASER_2_PORT, baudrate=LASER_BAUD_RATE)
-            self.ROBOT_ser = serial_device(data_handler=self.ROBOT_data_handler, port_name=self.ROBOT_PORT, baudrate=ROBOT_BAUD_RATE)
+            self.LASER_1_ser = SerialDevice(port_name=self.LASER_1_PORT, baudrate=LASER_BAUD_RATE)
+            self.LASER_1_ser.set_data_handler(self.LASER_1_data_handler)
+
+            self.ROBOT_ser = GRBLDevice(port_name=self.ROBOT_PORT, baudrate=ROBOT_BAUD_RATE)
 
             self.LASER_1_ser.start()
             #self.LASER_2_ser.start()
@@ -164,8 +166,7 @@ class win(QMainWindow):
         self.update_time_label.stop()
 
     def update_labels(self):
-        self.qtWindow.label_Command.setText(self.LASER_1_data_queue.get())
-        #self.ROBOT_ser.send('?\n')            
+        pass
 #-----------------------------------------------------------------------------------------------------
     def run_gcode(self):
         if self.isStarting:
@@ -177,8 +178,9 @@ class win(QMainWindow):
             self.isStarting = False
 
             self.gcode_thread = GCodeRunner(self.gcode_line, self.LASER_1_ser, self.ROBOT_ser)
-            #self.gcode_thread.gcode_status.connect(self.qtWindow.label_Command.setText)
-            #self.gcode_thread.gcode_position.connect(self.qtWindow.label_position.setText)
+            self.gcode_thread.gcode_status.connect(self.qtWindow.label_Status.setText)
+            self.gcode_thread.gcode_position.connect(self.qtWindow.label_position.setText)
+            self.gcode_thread.gcode_command.connect(self.qtWindow.label_Command.setText)
             self.gcode_thread.progress.connect(self.update_progress_bar)
             self.gcode_thread.finished.connect(self.on_gcode_finished)
             self.gcode_thread.start()
@@ -190,6 +192,7 @@ class win(QMainWindow):
             self.qtWindow.label_Status.setText("Stopped sampling")
             self.qtWindow.pushButton_start.setText("Start")
             self.qtWindow.pushButton_import_GCODE.setEnabled(True)
+            self.ROBOT_ser.send(b'G0 X0 Y0')
             self.isStarting = True
             if hasattr(self, 'gcode_thread'):
                 self.gcode_thread.stop()
@@ -201,10 +204,10 @@ class win(QMainWindow):
             if data:
                 self.LASER_1_data_queue.put(data)
 
-
+                
     def getAngle (self) -> float:
 
-        self.LASER_1_ser.send(b'E')
+        #self.LASER_1_ser.send(b'E')
         #self.LASER_2_ser.send(b'E')
         
         line_of_LASER_1 = self.LASER_1_data_queue.get()
