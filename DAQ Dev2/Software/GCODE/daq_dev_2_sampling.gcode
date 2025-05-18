@@ -1,9 +1,500 @@
 G28 ; Home all axes
+G90 ; Absolute positioning
 
+G0 X0 Y0 ;Check the initial point
+G4 P0
+
+;--- Sample at X50 Y18 ---
+M4 ; Turn laser on
+G0 X50 Y18 ; Center of sample
+G4 P0
+M101 ; Sample without movement
+G4 P0
+
+M5 ; Turn laser off
+M101 ; Sample without movement
+G4 P0
+
+M4 ; Turn laser on
+M100 ; Sample with vertical movement
+G0 X50 Y8
+G4 P0
+G0 X50 Y28
+G4 P0
+
+M5 ; Turn laser off
+M100
+G0 X50 Y8
+G4 P0
+G0 X50 Y28
+G4 P0
+
+M4 ; Turn laser on
+M100 ; Sample with horizontal movement
+G0 X40 Y18
+G4 P0
+G0 X60 Y18
+G4 P0
+
+M5 ; Turn laser off
+M100
+G0 X40 Y18
+G4 P0
+G0 X60 Y18
+G4 P0
+
+M4 ; Turn laser on
+M100
+G0 X50 Y8
+G4 P0
+G0 X50 Y28
+G4 P0
+
+M5 ; Turn laser off
+M100
+G0 X50 Y8
+G4 P0
+G0 X50 Y28
+G4 P0
+
+M4 ; Turn laser on
+M100
+G0 X40 Y18
+G4 P0
+G0 X60 Y18
+G4 P0
+
+M5 ; Turn laser off
+M100
+G0 X40 Y18
+G4 P0
+G0 X60 Y18
+G4 P0
+
+M4 ; Turn laser on
+M100
+G0 X50 Y8
+G4 P0
+G0 X50 Y28
+G4 P0
+
+M5 ; Turn laser off
+M100
+G0 X50 Y8
+G4 P0
+G0 X50 Y28
+G4 P0
+
+M4 ; Turn laser on
+G0 X60 Y28 ; Point-2
+G4 P0
+M101 ; Sample without movement
+G4 P0
+
+G0 X40 Y28 ; Point-3
+G4 P0
+M101 ; Sample without movement
+
+G0 X40 Y8 ; Point-4
+G4 P0
+M101 ; Sample without movement
+
+G0 X60 Y8 ; Point-5
+G4 P0
+M101 ; Sample without movement
+
+;--- Sample at X100 Y18 ---
+M4 ; Turn laser on
+G0 X100 Y18 ; Center of sample
+G4 P0
+M101 ; Sample without movement
+G4 P0
+
+M5 ; Turn laser off
+M101 ; Sample without movement
+G4 P0
+
+M4 ; Turn laser on
+M100 ; Sample with movement (vertical)
+G0 X100 Y8
+G4 P0
+G0 X100 Y28
+G4 P0
+
+M5 ; Turn laser off
+M100
+G0 X100 Y8
+G4 P0
+G0 X100 Y28
+G4 P0
+
+M4 ; Turn laser on
+M100 ; Sample with movement (horizontal)
+G0 X90 Y18
+G4 P0
+G0 X110 Y18
+G4 P0
+
+M5 ; Turn laser off
+M100
+G0 X90 Y18
+G4 P0
+G0 X110 Y18
+G4 P0
+
+M4 ; Turn laser on
+M100 ; Repeat vertical
+G0 X100 Y8
+G4 P0
+G0 X100 Y28
+G4 P0
+
+M5 ; Turn laser off
+M100
+G0 X100 Y8
+G4 P0
+G0 X100 Y28
+G4 P0
+
+M4 ; Turn laser on
+M100 ; Repeat horizontal
+G0 X90 Y18
+G4 P0
+G0 X110 Y18
+G4 P0
+
+M5 ; Turn laser off
+M100
+G0 X90 Y18
+G4 P0
+G0 X110 Y18
+G4 P0
+
+M4 ; Turn laser on
+M100 ; Final vertical
+G0 X100 Y8
+G4 P0
+G0 X100 Y28
+G4 P0
+
+M5 ; Turn laser off
+M100
+G0 X100 Y8
+G4 P0
+G0 X100 Y28
+G4 P0
+
+M4 ; Turn laser on
+G0 X110 Y28 ; Point-2
+G4 P0
+M101
+G4 P0
+
+G0 X90 Y28 ; Point-3
+G4 P0
+M101
+
+G0 X90 Y8 ; Point-4
+G4 P0
+M101
+
+G0 X110 Y8 ; Point-5
+G4 P0
+M101
+
+;--- Sample at X150 Y18 ---
 M4
-
-M0
+G0 X150 Y18
+G4 P0
+M101
+G4 P0
 
 M5
+M101
+G4 P0
 
-M0
+M4
+M100
+G0 X150 Y8
+G4 P0
+G0 X150 Y28
+G4 P0
+
+M5
+M100
+G0 X150 Y8
+G4 P0
+G0 X150 Y28
+G4 P0
+
+M4
+M100
+G0 X140 Y18
+G4 P0
+G0 X160 Y18
+G4 P0
+
+M5
+M100
+G0 X140 Y18
+G4 P0
+G0 X160 Y18
+G4 P0
+
+M4
+M100
+G0 X150 Y8
+G4 P0
+G0 X150 Y28
+G4 P0
+
+M5
+M100
+G0 X150 Y8
+G4 P0
+G0 X150 Y28
+G4 P0
+
+M4
+M100
+G0 X140 Y18
+G4 P0
+G0 X160 Y18
+G4 P0
+
+M5
+M100
+G0 X140 Y18
+G4 P0
+G0 X160 Y18
+G4 P0
+
+M4
+M100
+G0 X150 Y8
+G4 P0
+G0 X150 Y28
+G4 P0
+
+M5
+M100
+G0 X150 Y8
+G4 P0
+G0 X150 Y28
+G4 P0
+
+M4
+G0 X160 Y28 ; Point-2
+G4 P0
+M101
+G4 P0
+
+G0 X140 Y28 ; Point-3
+G4 P0
+M101
+
+G0 X140 Y8 ; Point-4
+G4 P0
+M101
+
+G0 X160 Y8 ; Point-5
+G4 P0
+M101
+
+;--- Sample at X201 Y18 ---
+M4
+G0 X201 Y18
+G4 P0
+M101
+G4 P0
+
+M5
+M101
+G4 P0
+
+M4
+M100
+G0 X201 Y8
+G4 P0
+G0 X201 Y28
+G4 P0
+
+M5
+M100
+G0 X201 Y8
+G4 P0
+G0 X201 Y28
+G4 P0
+
+M4
+M100
+G0 X191 Y18
+G4 P0
+G0 X211 Y18
+G4 P0
+
+M5
+M100
+G0 X191 Y18
+G4 P0
+G0 X211 Y18
+G4 P0
+
+M4
+M100
+G0 X201 Y8
+G4 P0
+G0 X201 Y28
+G4 P0
+
+M5
+M100
+G0 X201 Y8
+G4 P0
+G0 X201 Y28
+G4 P0
+
+M4
+M100
+G0 X191 Y18
+G4 P0
+G0 X211 Y18
+G4 P0
+
+M5
+M100
+G0 X191 Y18
+G4 P0
+G0 X211 Y18
+G4 P0
+
+M4
+M100
+G0 X201 Y8
+G4 P0
+G0 X201 Y28
+G4 P0
+
+M5
+M100
+G0 X201 Y8
+G4 P0
+G0 X201 Y28
+G4 P0
+
+M4
+G0 X211 Y28 ; Point-2
+G4 P0
+M101
+G4 P0
+
+G0 X191 Y28 ; Point-3
+G4 P0
+M101
+
+G0 X191 Y8 ; Point-4
+G4 P0
+M101
+
+G0 X211 Y8 ; Point-5
+G4 P0
+M101
+
+;--- Sample at X251 Y18 ---
+M4
+G0 X251 Y18
+G4 P0
+M101
+G4 P0
+
+M5
+M101
+G4 P0
+
+M4
+M100
+G0 X251 Y8
+G4 P0
+G0 X251 Y28
+G4 P0
+
+M5
+M100
+G0 X251 Y8
+G4 P0
+G0 X251 Y28
+G4 P0
+
+M4
+M100
+G0 X241 Y18
+G4 P0
+G0 X261 Y18
+G4 P0
+
+M5
+M100
+G0 X241 Y18
+G4 P0
+G0 X261 Y18
+G4 P0
+
+M4
+M100
+G0 X251 Y8
+G4 P0
+G0 X251 Y28
+G4 P0
+
+M5
+M100
+G0 X251 Y8
+G4 P0
+G0 X251 Y28
+G4 P0
+
+M4
+M100
+G0 X241 Y18
+G4 P0
+G0 X261 Y18
+G4 P0
+
+M5
+M100
+G0 X241 Y18
+G4 P0
+G0 X261 Y18
+G4 P0
+
+M4
+M100
+G0 X251 Y8
+G4 P0
+G0 X251 Y28
+G4 P0
+
+M5
+M100
+G0 X251 Y8
+G4 P0
+G0 X251 Y28
+G4 P0
+
+M4
+G0 X261 Y28 ; Point-2
+G4 P0
+M101
+G4 P0
+
+G0 X241 Y28 ; Point-3
+G4 P0
+M101
+
+G0 X241 Y8 ; Point-4
+G4 P0
+M101
+
+G0 X261 Y8 ; Point-5
+G4 P0
+M101

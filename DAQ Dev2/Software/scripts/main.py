@@ -1,8 +1,5 @@
-import math
-
 #Time related operations
 import time
-import csv
 from datetime import timedelta
 from datetime import datetime
 
@@ -22,15 +19,17 @@ from gui.daq_dev2_gui import Ui_MainWindow
 #Running GCODE
 import gcode_parser 
 
-#Testing
-import random
+import csv
+import os
 
 #Constant variables 
 LASER_BAUD_RATE = 256000
-DATA_LIMIT = 400 # Maximum number of data entries
+DATA_LIMIT = 4000 # Maximum number of data entries
 ROBOT_BAUD_RATE = 115200
 
-CALIBRATION_TIME = 1000 # 13000
+CALIBRATION_TIME = 15000 
+MAX_SAMPLE = 5
+MAX_POINT = 10
 
 #PyQt5 Thread
 class win(QMainWindow):
@@ -66,6 +65,8 @@ class win(QMainWindow):
         self.point = 0 
         self.sample = 0
         self.gcode_line = None
+        self.sample_time = None
+        self.folder_name = None
 
         #Scanning serial ports and adding them to the combobox list
         self.ports = list_uart_ports.list_uart_ports()
@@ -118,15 +119,10 @@ class win(QMainWindow):
         
         self.ROBOT_ser.send('G28') # Set 0-0 position
         self.LASER_1_ser.send(b'E') # Enable LASER_1
-        #self.LASER_2_ser.send(b'E') # Enable LASER_2
         
         self.qtWindow.label_Status.setText("Waiting for calibration ...")
 
-        # self.LASER_1_ser.send(b'C')  
-        # self.LASER_2_ser.send(b'C')
-
-        self.LASER_1_ser.send(b'D') # Disenable LASER_1
-        self.LASER_1_ser.flush_queue()
+        self.LASER_1_ser.send(b'C')  
         
         QTimer.singleShot(CALIBRATION_TIME, self.calibration_finish)
 
@@ -134,6 +130,10 @@ class win(QMainWindow):
         self.qtWindow.label_Status.setText("Calibration was completed!")
         self.qtWindow.pushButton_UART_connect.setEnabled(True)
         self.qtWindow.pushButton_import_GCODE.setEnabled(True)
+
+        
+        self.LASER_1_ser.send(b'D') # Disenable LASER_1
+        self.LASER_1_ser.flush_queue()
 
     
     def import_gcode(self):
@@ -169,6 +169,9 @@ class win(QMainWindow):
 
     def run_gcode(self):
         if self.isStarting:
+
+            self.sample_time = "dataset_" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") 
+            self.folder_name = f"data_{self.start_time}"
 
             self.update_time_label.start(1000)
             self.start_time = time.time()
@@ -213,19 +216,24 @@ class win(QMainWindow):
         self.isLaserON = laser
         self.isMoveing = movement
 
-        if self.point < 5:
+        if self.point < MAX_POINT:
             self.point = self.point + 1
         else:
             self.sample = self.sample + 1
             self.point = 0
 
-        # Create and start laser sampling thread
-        self.LASER_1_ser.flush_queue()
-        self.sampler_thread = LaserSampler(self.LASER_1_ser, laser_on=laser, data_limit=DATA_LIMIT)
-        self.sampler_thread.data_captured.connect(self.save_csv)  # Replace with saving logic
-        self.sampler_thread.finished.connect(self.on_sampling_finished)
+        if self.sample == MAX_SAMPLE:
+            print("MAX_SAMPLE Reached!")
+            self.data_recording_is_finished.emit()  
 
-        self.sampler_thread.start()
+        else:
+            # Create and start laser sampling thread
+            self.LASER_1_ser.flush_queue()
+            self.sampler_thread = LaserSampler(self.LASER_1_ser, laser_on=laser, data_limit=DATA_LIMIT)
+            self.sampler_thread.data_captured.connect(self.save_csv)  # Replace with saving logic
+            self.sampler_thread.finished.connect(self.on_sampling_finished)
+
+            self.sampler_thread.start()
 
 
     def on_sampling_finished(self):
@@ -233,9 +241,12 @@ class win(QMainWindow):
         self.sampler_thread.stop()     
         self.data_recording_is_finished.emit()  
 
+        os.makedirs(self.sample_time, exist_ok=True)
+
         # Save data to a CSV file
         file_name = f"data_{self.sample}_{self.point}.csv"
-        with open(file_name, 'w', newline='') as file:
+        full_path = os.path.join(self.sample_time, file_name)
+        with open(full_path, 'w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(["DIST", "AMP", "TEMP", "VOLT","Timestamp", "Angle", "ON", "Movement"])
             writer.writerows(self.data_entries)

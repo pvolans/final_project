@@ -169,7 +169,7 @@ class GCodeRunner(QThread):
 
             elif first_word == "M101":
                 self.gcode_status.emit("Sampling without Movement")
-                self._movement = True
+                self._movement = False
                 self.data_recording_sig.emit(self._movement, self._laser_on)
                 with QMutexLocker(self.mutex_is_recording):
                     while not self._data_is_recorded:
