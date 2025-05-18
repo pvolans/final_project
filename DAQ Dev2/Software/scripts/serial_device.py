@@ -64,3 +64,10 @@ class SerialDevice(QThread):
 
         self.quit()
         self.wait()
+
+    def flush_queue(self):
+        while not self.queue.empty():
+            try:
+                self.queue.get_nowait()
+            except queue.Empty:
+                break
