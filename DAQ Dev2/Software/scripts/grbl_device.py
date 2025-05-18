@@ -26,7 +26,7 @@ class GRBLDevice(SerialDevice):
 
         if line.strip() == "ok":
             self.ok_received.emit()
-            print("ok responded")
+            #print("ok responded")
 
         elif line.startswith("error"):
             #print(f"[GRBL ERROR] {line}")

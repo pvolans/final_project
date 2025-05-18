@@ -4,17 +4,18 @@ import math
 import time
 import csv
 from datetime import timedelta
+from datetime import datetime
 
 #GUI
 from gcode_runner import GCodeRunner
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, pyqtSignal
 
 #Serial devices
 import list_uart_ports as list_uart_ports
 from serial_device import SerialDevice
 from grbl_device import GRBLDevice
-import queue
+from laser_sampler import LaserSampler
 
 from gui.daq_dev2_gui import Ui_MainWindow
 
@@ -26,13 +27,15 @@ import random
 
 #Constant variables 
 LASER_BAUD_RATE = 256000
-DATA_LIMIT = 4000  # Maximum number of data entries
+DATA_LIMIT = 400 # Maximum number of data entries
 ROBOT_BAUD_RATE = 115200
 
 CALIBRATION_TIME = 1000 # 13000
 
 #PyQt5 Thread
 class win(QMainWindow):
+    data_recording_is_finished = pyqtSignal()
+
     def __init__(self)->None:
         super().__init__()
         self.qtWindow = Ui_MainWindow()
@@ -57,15 +60,12 @@ class win(QMainWindow):
 
         self.isStarting = True
         self.isLaserON = True
+        self.isMoveing = True
         self.start_time = 0.0
         self.data_entries = []
         self.point = 0 
         self.sample = 0
         self.gcode_line = None
-
-        #Serial data queue to handle shared resources
-        self.LASER_1_data_queue = queue.Queue()
-        self.ROBOT_data_queue = queue.Queue()
 
         #Scanning serial ports and adding them to the combobox list
         self.ports = list_uart_ports.list_uart_ports()
@@ -90,7 +90,7 @@ class win(QMainWindow):
         if self.LASER_1_PORT and self.LASER_2_PORT and self.ROBOT_PORT:
 
             self.LASER_1_ser = SerialDevice(port_name=self.LASER_1_PORT, baudrate=LASER_BAUD_RATE)
-            self.LASER_1_ser.set_data_handler(self.LASER_1_data_handler)
+            #self.LASER_1_ser.set_data_handler(self.LASER_1_data_handler)
 
             self.ROBOT_ser = GRBLDevice(port_name=self.ROBOT_PORT, baudrate=ROBOT_BAUD_RATE)
 
@@ -105,14 +105,10 @@ class win(QMainWindow):
         #Calibrating lasers after connecting
         self.calibration()
 
-        #Displaying the angle of incident
-        self.angle_update_timer = QTimer(self)
-        self.angle_update_timer.timeout.connect(self.getAngle)
-        self.angle_update_timer.start(1000) #Starting to display angle after calibration
-
-        self.label_update_timer = QTimer(self)
-        self.label_update_timer.timeout.connect(self.update_labels)
-        self.label_update_timer.start(100)
+        # #Displaying the angle of incident
+        # self.angle_update_timer = QTimer(self)
+        # self.angle_update_timer.timeout.connect(self.getAngle)
+        # self.angle_update_timer.start(1000) #Starting to display angle after calibration
 
         self.update_time_label = QTimer(self)
         self.update_time_label.timeout.connect(self.update_time)
@@ -128,6 +124,10 @@ class win(QMainWindow):
 
         # self.LASER_1_ser.send(b'C')  
         # self.LASER_2_ser.send(b'C')
+
+        self.LASER_1_ser.send(b'D') # Disenable LASER_1
+        self.LASER_1_ser.flush_queue()
+        
         QTimer.singleShot(CALIBRATION_TIME, self.calibration_finish)
 
     def calibration_finish (self):
@@ -164,23 +164,29 @@ class win(QMainWindow):
         self.qtWindow.pushButton_import_GCODE.setEnabled(True)
         self.isStarting = True
         self.update_time_label.stop()
+        self.LASER_1_ser.send(b'D\n')
+        self.ROBOT_ser.send(b'G0 X0 Y0\n')
 
-    def update_labels(self):
-        pass
-#-----------------------------------------------------------------------------------------------------
     def run_gcode(self):
         if self.isStarting:
+
             self.update_time_label.start(1000)
             self.start_time = time.time()
+
             self.qtWindow.label_Status.setText("Starting to sample")
             self.qtWindow.pushButton_start.setText("Stop")
             self.qtWindow.pushButton_import_GCODE.setEnabled(False)
+
             self.isStarting = False
 
-            self.gcode_thread = GCodeRunner(self.gcode_line, self.LASER_1_ser, self.ROBOT_ser)
+            self.gcode_thread = GCodeRunner(self.gcode_line, self.LASER_1_ser, self.ROBOT_ser, parent=self)
             self.gcode_thread.gcode_status.connect(self.qtWindow.label_Status.setText)
             self.gcode_thread.gcode_position.connect(self.qtWindow.label_position.setText)
             self.gcode_thread.gcode_command.connect(self.qtWindow.label_Command.setText)
+
+            self.gcode_thread.data_recording_sig.connect(self.data_record)
+            self.data_recording_is_finished.connect(self.gcode_thread.run_next_gcode)
+
             self.gcode_thread.progress.connect(self.update_progress_bar)
             self.gcode_thread.finished.connect(self.on_gcode_finished)
             self.gcode_thread.start()
@@ -193,54 +199,105 @@ class win(QMainWindow):
             self.qtWindow.pushButton_start.setText("Start")
             self.qtWindow.pushButton_import_GCODE.setEnabled(True)
             self.isStarting = True
-            if hasattr(self, 'gcode_thread'):
+            if hasattr(self, 'gcode_thread'): 
                 self.gcode_thread.stop()
+
+            if hasattr(self, 'sampler_thread') and self.sampler_thread.isRunning():
+                self.sampler_thread.stop()
+                self.sampler_thread.wait()
 
             self.ROBOT_ser.send(b'G0 X0 Y0')
 
-                
+    def data_record(self, movement, laser):
+        #print("Starting threaded data recording...")
+        self.isLaserON = laser
+        self.isMoveing = movement
 
-    def LASER_1_data_handler(self):
-        while not self.LASER_1_ser.queue.empty():
-            data = self.LASER_1_ser.queue.get()
-            if data:
-                self.LASER_1_data_queue.put(data)
-
-                
-    def getAngle (self) -> float:
-
-        #self.LASER_1_ser.send(b'E')
-        #self.LASER_2_ser.send(b'E')
-        
-        line_of_LASER_1 = self.LASER_1_data_queue.get()
-        #line_of_LASER_2 = self.LASER_2_PORT.readline().decode('utf-8').strip()
-
-        split_of_LASER_1 = line_of_LASER_1.split(';')
-        #split_of_LASER_2 = line_of_LASER_2.split(';')
-
-        length_R = float(split_of_LASER_1[1])
-        length_L = float(random.randint(0,500) / 10) #split_of_LASER_2[1]
-
-        distance_between = 19.5
-        measurement_difference = length_R - length_L
-
-        if measurement_difference != 0:
-            angle = math.atan(distance_between / measurement_difference)
+        if self.point < 5:
+            self.point = self.point + 1
         else:
-            angle = 0
+            self.sample = self.sample + 1
+            self.point = 0
+
+        # Create and start laser sampling thread
+        self.LASER_1_ser.flush_queue()
+        self.sampler_thread = LaserSampler(self.LASER_1_ser, laser_on=laser, data_limit=DATA_LIMIT)
+        self.sampler_thread.data_captured.connect(self.save_csv)  # Replace with saving logic
+        self.sampler_thread.finished.connect(self.on_sampling_finished)
+
+        self.sampler_thread.start()
+
+
+    def on_sampling_finished(self):
+        #print("Data sampling completed.")
+        self.sampler_thread.stop()     
+        self.data_recording_is_finished.emit()  
+
+        # Save data to a CSV file
+        file_name = f"data_{self.sample}_{self.point}.csv"
+        with open(file_name, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["DIST", "AMP", "TEMP", "VOLT","Timestamp", "Angle", "ON", "Movement"])
+            writer.writerows(self.data_entries)
+        #print(f"Saved {len(data_entries)} entries to {file_name}.")
+        self.data_entries = []
+        
+
+    def save_csv(self, data_line):
+        # Assume data_line format: 'id;[val1];id;[val2];...'
+        try:
+            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
             
-        angle = angle * 180 / math.pi
+            parts = data_line.split(';')
+            numerical_values = []
+            
+            for i in range(1, len(parts), 2):  # Access only the '[value]' parts
+                value = parts[i].strip().replace('[', '').replace(']', '')
+                numerical_values.append(value)
 
-        self.qtWindow.label_angle.setText(str(angle))
+            # Append to data_entries with timestamp, angle, laser and movement state
+            row = numerical_values + [
+                timestamp,
+                self.getAngle(),
+                self.isLaserON,
+                self.isMoveing
+            ]
+            self.data_entries.append(row)
 
-        return angle
+            print(len(self.data_entries))
+
+        except Exception as e:
+            print(f"Failed to save line: {data_line} — Error: {e}")
+
+    def getAngle (self) -> float:
+        return 90.0
+
+    #     #self.LASER_1_ser.send(b'E')
+    #     #self.LASER_2_ser.send(b'E')
+        
+    #     line_of_LASER_1 = self.LASER_1_data_queue.get()
+    #     #line_of_LASER_2 = self.LASER_2_PORT.readline().decode('utf-8').strip()
+
+    #     split_of_LASER_1 = line_of_LASER_1.split(';')
+    #     #split_of_LASER_2 = line_of_LASER_2.split(';')
+
+    #     length_R = float(split_of_LASER_1[1])
+    #     length_L = float(random.randint(0,500) / 10) #split_of_LASER_2[1]
+
+    #     distance_between = 19.5
+    #     measurement_difference = length_R - length_L
+
+    #     if measurement_difference != 0:
+    #         angle = math.atan(distance_between / measurement_difference)
+    #     else:
+    #         angle = 0
+            
+    #     angle = angle * 180 / math.pi
+
+    #     self.qtWindow.label_angle.setText(str(angle))
+
+    #     return angle
     
-    def LASER_2_data_handler(self):
-        pass
-    
-
-    def ROBOT_data_handler(self):
-        pass
 
 if __name__ == "__main__":
     app = QApplication([])
