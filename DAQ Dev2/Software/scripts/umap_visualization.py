@@ -34,10 +34,21 @@ def load_all_features(preprocessed_dir):
 
 def visualize_umap(df, label_column='source'):
     labels = df[label_column].values
-    features = df.drop(columns=[label_column])
 
-    # Remove non-numeric columns
-    features = features.select_dtypes(include=[np.number])
+    # Use only the top 5 high entropy features
+    selected_features = [
+        'wavelet_detail_1_entropy',
+        'wavelet_detail_2_entropy',
+        'ar_coeff_1',
+        'wavelet_detail_3_entropy',
+        'wavelet_detail_6_entropy',
+        'ar_coeff_7',
+        'ar_coeff_8'
+
+
+    ]
+
+    features = df[selected_features].copy()
 
     # Drop rows with NaN or Inf
     features.replace([np.inf, -np.inf], np.nan, inplace=True)
@@ -54,10 +65,11 @@ def visualize_umap(df, label_column='source'):
 
     score = silhouette_score(embedding, labels)
     print(f"Silhouette score = {score:.2f}")
+
     # Plot
     plt.figure(figsize=(10, 6))
     sns.scatterplot(x=embedding[:, 0], y=embedding[:, 1], hue=labels, palette='tab10')
-    plt.title('UMAP Projection of Feature Space')
+    plt.title('UMAP Projection of Top Entropy Features')
     plt.xlabel('UMAP-1')
     plt.ylabel('UMAP-2')
     plt.legend(title=label_column, bbox_to_anchor=(1.05, 1), loc='upper left')
