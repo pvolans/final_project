@@ -2,7 +2,7 @@ import pandas as pd
 from pathlib import Path
 
 # Define the dataset root directory relative to this script
-dataset_root = Path(__file__).resolve().parent.parent / 'dataset_interpolated'
+dataset_root = Path(__file__).resolve().parent.parent / 'dataset_2'
 
 # Find all CSV files matching the expected pattern recursively
 csv_files = list(dataset_root.rglob('data_*.csv'))
@@ -49,18 +49,23 @@ for file in csv_files:
 
 # Compute overall jitter metrics
 if all_intervals:
-    intervals_series = pd.Series(all_intervals)
+    intervals_series = pd.Series(all_intervals) 
     metrics = {
         'mean_interval (s)': intervals_series.mean(),
+        'mean_frequency (Hz)': 1 / intervals_series.mean() if intervals_series.mean() != 0 else 0,
         'std_interval (s)': intervals_series.std(),
+        'std_frequency (Hz)': 1 / intervals_series.std() if intervals_series.std() != 0 else 0,
         'min_interval (s)': intervals_series.min(),
-        'max_interval (s)': intervals_series.max()
+        'min_frequency (Hz)': 1 / intervals_series.min() if intervals_series.min() != 0 else 0,
+        'max_interval (s)':  intervals_series.max(),
+        'max_frequency (Hz)': 1 /intervals_series.max() if intervals_series.max() != 0 else 0,
     }
 
+
     print("\n=== Overall Jitter Metrics ===")
-    print(f"Mean interval: {pd.Series(all_intervals).mean():.6f} s")
-    print(f"Standard deviation: {pd.Series(all_intervals).std():.6f} s")
-    print(f"Minimum interval: {min_interval_value:.6f} s in file: {min_file}")
-    print(f"Maximum interval: {max_interval_value:.6f} s in file: {max_file}")
+    print(f"Mean interval: {metrics['mean_interval (s)']:.6f} s ( {metrics['mean_frequency (Hz)']} Hz )")
+    print(f"Standard deviation: {pd.Series(all_intervals).std():.6f} s ( {metrics['std_frequency (Hz)']} Hz )")
+    print(f"Minimum interval: {min_interval_value:.6f} s ( {metrics['min_frequency (Hz)']} Hz ) in file: {min_file} ")
+    print(f"Maximum interval: {max_interval_value:.6f} s ( {metrics['max_frequency (Hz)']} Hz ) in file: {max_file}")
 else:
     print("No valid intervals found.")
