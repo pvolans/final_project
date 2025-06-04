@@ -1,19 +1,17 @@
 import pandas as pd
 from pathlib import Path
 
-time_series_sample = 3900
+time_series_length = 3900
 
-# Function to load interpolated CSVs
-def load_uniform(file_path):
-    df = pd.read_csv(
-        file_path
-    )
+# Load raw CSV without modifying column headers
+def load_raw(file_path):
+    df = pd.read_csv(file_path, header=0)
     return df
 
-def validate_signal_length(data, min_length=time_series_sample):
+def validate_signal_length(data, min_length=time_series_length):
     return len(data) >= min_length
 
-def trim_signal_symmetric(data, target_length=time_series_sample):
+def trim_signal_symmetric(data, target_length=time_series_length):
     current_length = len(data)
     if current_length < target_length:
         raise ValueError(f"Signal length {current_length} is less than target {target_length}")
@@ -22,22 +20,21 @@ def trim_signal_symmetric(data, target_length=time_series_sample):
     end_trim = excess - start_trim
     return data.iloc[start_trim:current_length-end_trim].reset_index(drop=True)
 
-# Define project directories
-script_dir        = Path(__file__).resolve().parent
-project_root      = script_dir.parent
-dataset_root      = project_root / 'dataset_2'
-clean_root        = project_root / 'dataset_preprocessed'
+# Set paths
+script_dir = Path(__file__).resolve().parent
+project_root = script_dir.parent
+raw_root = project_root / 'dataset_2'
+clean_root = project_root / 'dataset_preprocessed'
 clean_root.mkdir(exist_ok=True)
 
-# Process each dataset subfolder
-for sub in dataset_root.iterdir():
+# Process each sample folder
+for sub in raw_root.iterdir():
     if not sub.is_dir():
         continue
 
-    out_sub = clean_root / f"{sub.name}_clean"
+    out_sub = clean_root / f"{sub.name}"
     out_sub.mkdir(parents=True, exist_ok=True)
 
-    # Build lookup by sample and point number
     files = list(sub.glob('data_*.csv'))
     lookup = {}
     for f in files:
@@ -48,47 +45,43 @@ for sub in dataset_root.iterdir():
         _, sample, point = parts
         lookup[(int(sample), int(point))] = f
 
-    # Iterate signal runs (odd point numbers)
-    for (sample, point), on_file in sorted(lookup.items()):
+    for (sample, point), sig_file in sorted(lookup.items()):
         if point % 2 != 1:
             continue
-        off_key = (sample, point + 1)
-        if off_key not in lookup:
-            print(f"Missing OFF file for {on_file.name}")
+
+        noise_key = (sample, point + 1)
+        if noise_key not in lookup:
+            print(f"Missing noise file for {sig_file.name}")
             continue
 
-        off_file = lookup[off_key]
-        sig      = load_uniform(on_file)
-        noise    = load_uniform(off_file)
+        noise_file = lookup[noise_key]
+        sig = load_raw(sig_file)
+        noise = load_raw(noise_file)
 
-        if not validate_signal_length(data=sig, min_length=time_series_sample):
-            print(f"Too short: {on_file.name}")
+        if not validate_signal_length(sig, min_length=time_series_length):
+            print(f"Too short: {sig_file.name}")
+            continue
+        if not validate_signal_length(noise, min_length=time_series_length):
+            print(f"Too short: {noise_file.name}")
             continue
 
-        if not validate_signal_length(data=noise, min_length=time_series_sample):
-            print(f"Too short: {off_file.name}")
+        if sig.shape[1] < 1 or noise.shape[1] < 1:
+            print(f"Empty file or bad format: {sig_file.name}")
             continue
 
-        # Debug: inspect columns and ranges
-        print(f"Processing sample {sample}, point {point}")
-        print(f"ON range: {sig.index.min()} to {sig.index.max()}")
-        print(f"OFF range: {noise.index.min()} to {noise.index.max()}")
+        # Subtract only first column (assumed AMP)
+        sig_cleaned = sig.copy()
+        sig_cleaned.iloc[:, 1] = sig.iloc[:, 1].values - noise.iloc[:, 1].reindex(sig.index).fillna(1).values
 
-        if 'AMP' not in sig.columns or 'AMP' not in noise.columns:
-            print(f"AMP column missing in files; skipping {on_file.name}")
+        try:
+            trimmed = trim_signal_symmetric(sig_cleaned)
+        except ValueError as e:
+            print(e)
             continue
 
-        # Align noise AMP to signal's timestamp grid, filling missing with 0
-        noise_amp_aligned = noise['AMP'].reindex(sig.index).fillna(0)
+        # Save with all columns and header intact
+        out_path = out_sub / f"{sig_file.name}"
+        trimmed.to_csv(out_path, index=False)
+        print(f"Saved cleaned: {out_path}")
 
-        # Subtract only the 'AMP' channel
-        clean = sig.copy()
-        clean['AMP'] = sig['AMP'] - noise_amp_aligned
-
-        # Save cleaned CSV including all other columns
-        out_path = out_sub / f"clean_{on_file.name}"
-        clean = trim_signal_symmetric(clean)
-        clean.to_csv(out_path, index=False, header=False)
-        print(f"Saved cleaned AMP to {out_path}")
-
-print("Noise removal (AMP only) complete.")
+print("Signal cleaning complete.")

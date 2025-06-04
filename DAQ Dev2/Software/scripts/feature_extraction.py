@@ -101,14 +101,14 @@ def process_single_file(file_path, output_dir_spectral, output_dir_wavelets, dat
             return False
        
         amp = df['AMP'].values
-        md = {k: df[k].iloc[0] for k in ['DIST','Angle','ON','Movement','Timestamp']}
+        md = {k: df[k].iloc[0] for k in [ 'DIST','Angle','ON','Movement', 'Timestamp']}
         spec = {**extract_yule_walker_features(amp), **extract_welch_features(amp), **md}
         wave = {**extract_wavelet_features(amp), **md}
         name_parts = Path(file_path).stem.split('_')
-        sample_id = name_parts[2]
-        point = name_parts[3]
-        spectral_filename = f"clean_data_{sample_id}_{point}_{dataset_id}_spectral.csv"
-        wavelets_filename = f"clean_data_{sample_id}_{point}_{dataset_id}_wavelets.csv"
+        sample_id = name_parts[1]
+        point = name_parts[2]
+        spectral_filename = f"data_{sample_id}_{point}_{dataset_id}_spectral.csv"
+        wavelets_filename = f"data_{sample_id}_{point}_{dataset_id}_wavelets.csv"
         pd.DataFrame([spec]).to_csv(output_dir_spectral / spectral_filename, index=False)
         pd.DataFrame([wave]).to_csv(output_dir_wavelets / wavelets_filename, index=False)
         return True
@@ -118,25 +118,29 @@ def process_single_file(file_path, output_dir_spectral, output_dir_wavelets, dat
 
 def main():
     base_dir = Path(__file__).resolve().parent.parent
-    pre_root = base_dir / 'dataset_preprocessed'
+    pre_root = base_dir / 'dataset_interpolated'
     feature_root = base_dir / 'dataset_feature_extracted'
     dataset_id = 0
     for sub in sorted(pre_root.iterdir()):
         if not sub.is_dir():
+            print("There is no directory as a sub folder")
             continue
-        for f in sorted(sub.glob('clean_data_*.csv')):
+        for f in sorted(sub.glob('data_*.csv')):
             name_parts = f.stem.split('_')
-            if len(name_parts) < 4:
-                continue
-            sample_id = name_parts[2]
+            sample_id = name_parts[1]
+
             sample_folder = feature_root / f"dataset_sample_{sample_id}"
             out_spec = sample_folder / 'dataset_spectral'
             out_wave = sample_folder / 'dataset_wavelets'
+
             out_spec.mkdir(parents=True, exist_ok=True)
             out_wave.mkdir(parents=True, exist_ok=True)
+
             print(f"Processing {f.name} with dataset id {dataset_id}")
             process_single_file(f, out_spec, out_wave, dataset_id)
             dataset_id += 1
+
+        print("Finished")
 
 if __name__ == '__main__':
     main()

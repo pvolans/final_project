@@ -6,7 +6,7 @@ script_dir = Path(__file__).resolve().parent
 project_root = script_dir.parent
 
 # Define source and target dataset roots
-dataset_root = project_root / 'dataset'
+dataset_root = project_root / 'dataset_preprocessed'
 interpolated_root = project_root / 'dataset_interpolated'
 
 # Create the top-level interpolated folder if it doesn't exist
