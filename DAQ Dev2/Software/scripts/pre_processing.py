@@ -26,7 +26,7 @@ def trim_signal_symmetric(data, target_length=time_series_sample):
 script_dir        = Path(__file__).resolve().parent
 project_root      = script_dir.parent
 dataset_root      = project_root / 'dataset_2'
-clean_root        = project_root / 'dataset_clean'
+clean_root        = project_root / 'dataset_preprocessed'
 clean_root.mkdir(exist_ok=True)
 
 # Process each dataset subfolder
