@@ -10,8 +10,7 @@ class TimeSeriesPlotter:
         # Use Path to find folders
         self.script_dir = Path(__file__).resolve().parent
         self.project_root = self.script_dir.parent
-        self.dataset_root = self.project_root / 'dataset_2'
-        self.clean_root = self.project_root / 'dataset_preprocessed'
+        self.dataset_root = self.project_root / 'dataset_2_40'
         self.signals_data = []
         
     def find_dataset_folders(self):
@@ -21,7 +20,7 @@ class TimeSeriesPlotter:
             return []
         
         # Find folders matching pattern dataset_2025-05-*
-        pattern = "dataset_2025-05-*"
+        pattern = "dataset_*"
         folders = list(self.dataset_root.glob(pattern))
         return sorted(folders)
     
@@ -166,7 +165,6 @@ class TimeSeriesPlotter:
         print(f"Script directory: {self.script_dir}")
         print(f"Project root: {self.project_root}")
         print(f"Dataset root: {self.dataset_root}")
-        print(f"Clean root: {self.clean_root}")
         print(f"Dataset root exists: {self.dataset_root.exists()}")
         
         signal_files = self.collect_signal_files(50, randomize=False)  # Get more files for info, don't randomize for info
