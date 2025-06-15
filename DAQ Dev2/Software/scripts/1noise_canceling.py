@@ -13,12 +13,12 @@ def load_uniform(file_path):
 # Define project directories
 script_dir        = Path(__file__).resolve().parent
 project_root      = script_dir.parent
-interpolated_root = project_root / 'dataset_2'
+dataset_root      = project_root / 'dataset_2_40'
 clean_root        = project_root / 'dataset_clean'
 clean_root.mkdir(exist_ok=True)
 
 # Process each dataset subfolder
-for sub in interpolated_root.iterdir():
+for sub in dataset_root.iterdir():
     if not sub.is_dir():
         continue
 
@@ -66,7 +66,7 @@ for sub in interpolated_root.iterdir():
         clean['AMP'] = sig['AMP'] - noise_amp_aligned
 
         # Save cleaned CSV including all other columns
-        out_path = out_sub / f"clean_{on_file.name}"
+        out_path = out_sub / f"{on_file.name}"
         clean.to_csv(out_path, index_label='Timestamp')
         print(f"Saved cleaned AMP to {out_path}")
 
