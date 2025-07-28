@@ -7,6 +7,9 @@ def load_uniform(file_path):
         file_path,
         parse_dates=['Timestamp'],
         index_col='Timestamp'
+        file_path,
+        parse_dates=['Timestamp'],
+        index_col='Timestamp'
     )
     return df
 
@@ -18,7 +21,7 @@ clean_root        = project_root / 'dataset_clean'
 clean_root.mkdir(exist_ok=True)
 
 # Process each dataset subfolder
-for sub in dataset_root.iterdir():
+for sub in interpolated_root.iterdir():
     if not sub.is_dir():
         continue
 
