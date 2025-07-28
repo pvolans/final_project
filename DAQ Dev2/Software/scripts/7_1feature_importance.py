@@ -2,11 +2,8 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.model_selection import cross_val_score
 from sklearn.svm import SVC
-import shap
-import matplotlib.pyplot as plt
-from tqdm import tqdm
 from collections import Counter
 
 # --- Config ---
@@ -65,10 +62,6 @@ else:
 
 print(f"Top {FEATURE_NUM} features (by name):", top_feature_names)
 
-# --- Step 3: SHAP analysis ---
-explainer = shap.TreeExplainer(rf)
-shap_values = explainer.shap_values(X)
-#shap.summary_plot(shap_values, X, max_display=10)
 
 # --- Step 4: Cross-validate SVM with top 10 features ---
 X_top = X[:, top_indices]

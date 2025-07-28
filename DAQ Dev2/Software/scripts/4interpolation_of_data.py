@@ -42,3 +42,4 @@ for sub in dataset_root.iterdir():
                 print(f"Error processing {csv_file}: {e}")
 
 print("Interpolation complete.")
+exec(open('5trim.py').read())

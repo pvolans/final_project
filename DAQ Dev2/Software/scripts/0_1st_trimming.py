@@ -18,8 +18,8 @@ def trim_signal_symmetric(data, target_length):
 # Define project directories
 script_dir   = Path(__file__).resolve().parent
 project_root = script_dir.parent
-dataset_root = project_root / 'dataset_interpolated'
-pre_processed   = project_root / 'dataset_preprocessed'
+dataset_root = project_root / 'dataset_2_40'
+pre_processed   = project_root / 'dataset_1st_trim'
 pre_processed.mkdir(exist_ok=True)
 
 # -------------------- #
@@ -93,3 +93,4 @@ for sub in dataset_root.iterdir():
         out_path = out_sub / f"{f.name}"
         trimmed.to_csv(out_path, index=False, header=True)
         print(f"Saved to {out_path}")
+exec(open('1noise_canceling.py').read())

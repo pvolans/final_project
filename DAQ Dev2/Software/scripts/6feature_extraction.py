@@ -1,7 +1,6 @@
 import os
 import pandas as pd
 import numpy as np
-from scipy import signal
 from scipy.signal import welch
 import pywt
 from pathlib import Path

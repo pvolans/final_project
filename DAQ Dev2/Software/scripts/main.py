@@ -166,6 +166,7 @@ class win(QMainWindow):
         self.update_time_label.stop()
         self.LASER_1_ser.send(b'D\n')
         self.ROBOT_ser.send(b'G0 X0 Y0\n')
+        self.ROBOT_ser.send(b'G0 X0 Y0\n')
 
     def run_gcode(self):
         if self.isStarting:

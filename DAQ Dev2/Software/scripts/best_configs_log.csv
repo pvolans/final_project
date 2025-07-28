@@ -1,0 +1,9 @@
+iteration,accuracy,activation_1,activation_2,activation_3,kernel_size_1,kernel_size_2,filters_conv1,filters_conv2,dropout_rate
+1,0.6586538461538461,relu,relu,relu,5,5,64,64,0.4
+2,0.6826923076923077,relu,relu,relu,5,5,64,64,0.5
+4,0.6875,relu,relu,relu,5,5,64,128,0.5
+28,0.7211538461538461,relu,relu,relu,5,5,512,128,0.5
+39,0.7259615384615384,relu,relu,relu,5,7,64,512,0.4
+193,0.7355769230769231,relu,relu,relu,9,5,64,64,0.4
+479,0.7403846153846154,relu,relu,sigmoid,7,9,512,512,0.4
+501,0.75,relu,relu,sigmoid,9,5,256,256,0.4

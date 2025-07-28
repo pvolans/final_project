@@ -55,3 +55,4 @@ class DatasetSnipper:
 if __name__ == '__main__':
     snipper = DatasetSnipper()
     snipper.process_all()
+    exec(open('4interpolation_of_data.py').read())

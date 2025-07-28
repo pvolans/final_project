@@ -13,7 +13,7 @@ def load_uniform(file_path):
 # Define project directories
 script_dir        = Path(__file__).resolve().parent
 project_root      = script_dir.parent
-dataset_root      = project_root / 'dataset_2_40'
+dataset_root      = project_root / 'dataset_1st_trim'
 clean_root        = project_root / 'dataset_clean'
 clean_root.mkdir(exist_ok=True)
 
@@ -71,3 +71,4 @@ for sub in dataset_root.iterdir():
         print(f"Saved cleaned AMP to {out_path}")
 
 print("Noise removal (AMP only) complete.")
+exec(open('3snippet.py').read())
