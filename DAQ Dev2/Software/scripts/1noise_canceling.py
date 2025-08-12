@@ -7,10 +7,9 @@ def load_uniform(file_path):
         file_path,
         parse_dates=['Timestamp'],
         index_col='Timestamp'
-        file_path,
-        parse_dates=['Timestamp'],
-        index_col='Timestamp'
     )
+    df = df[~df.index.duplicated(keep='first')]
+
     return df
 
 # Define project directories
@@ -21,7 +20,7 @@ clean_root        = project_root / 'dataset_clean'
 clean_root.mkdir(exist_ok=True)
 
 # Process each dataset subfolder
-for sub in interpolated_root.iterdir():
+for sub in dataset_root.iterdir():
     if not sub.is_dir():
         continue
 
@@ -61,6 +60,9 @@ for sub in interpolated_root.iterdir():
             print(f"AMP column missing in files; skipping {on_file.name}")
             continue
 
+        sig['AMP'] = pd.to_numeric(sig['AMP'], errors='coerce')
+        noise['AMP'] = pd.to_numeric(noise['AMP'], errors='coerce')
+        
         # Align noise AMP to signal's timestamp grid, filling missing with 0
         noise_amp_aligned = noise['AMP'].reindex(sig.index).fillna(0)
 
