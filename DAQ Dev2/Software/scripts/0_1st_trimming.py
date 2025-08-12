@@ -3,7 +3,7 @@ from pathlib import Path
 
 # Function to load interpolated CSVs
 def load_uniform(file_path):
-    df = pd.read_csv(file_path)
+    df = pd.read_csv(file_path, on_bad_lines='skip', engine='python')
     return df
 
 def trim_signal_symmetric(data, target_length):
@@ -40,7 +40,7 @@ for sub in dataset_root.iterdir():
             all_lengths.append(length)
             file_count += 1
         except Exception as e:
-            print(f"Error reading {f.name}: {e}")
+            print(f"Error reading {sub.name}/{f.name}: {e}")
 
 if all_lengths:
     print("\n--- Dataset Summary ---")
@@ -93,4 +93,4 @@ for sub in dataset_root.iterdir():
         out_path = out_sub / f"{f.name}"
         trimmed.to_csv(out_path, index=False, header=True)
         print(f"Saved to {out_path}")
-exec(open('1noise_canceling.py').read())
+#exec(open('1noise_canceling.py').read())
