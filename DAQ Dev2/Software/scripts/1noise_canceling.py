@@ -62,7 +62,7 @@ for sub in dataset_root.iterdir():
 
         sig['AMP'] = pd.to_numeric(sig['AMP'], errors='coerce')
         noise['AMP'] = pd.to_numeric(noise['AMP'], errors='coerce')
-        
+
         # Align noise AMP to signal's timestamp grid, filling missing with 0
         noise_amp_aligned = noise['AMP'].reindex(sig.index).fillna(0)
 
@@ -76,4 +76,4 @@ for sub in dataset_root.iterdir():
         print(f"Saved cleaned AMP to {out_path}")
 
 print("Noise removal (AMP only) complete.")
-exec(open('3snippet.py').read())
+#exec(open('3snippet.py').read())
