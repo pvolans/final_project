@@ -10,7 +10,7 @@ class TimeSeriesPlotter:
         # Use Path to find folders
         self.script_dir = Path(__file__).resolve().parent
         self.project_root = self.script_dir.parent
-        self.dataset_root = self.project_root / 'dataset_2_40'
+        self.dataset_root = self.project_root / 'dataset_preprocessed_with_interpolation'
         self.signals_data = []
         
     def find_dataset_folders(self):

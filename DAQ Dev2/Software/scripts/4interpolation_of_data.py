@@ -6,13 +6,13 @@ script_dir = Path(__file__).resolve().parent
 project_root = script_dir.parent
 
 # Define source and target dataset roots
-dataset_root = project_root / 'dataset_snipped'
+dataset_root = project_root / 'dataset_short_snipped'
 interpolated_root = project_root / 'dataset_interpolated'
 
 # Create the top-level interpolated folder if it doesn't exist
 interpolated_root.mkdir(exist_ok=True)
 
-# Define your resampling rate (e.g., ~57 Hz)
+# Define your resampling rate (e.g., ~500 Hz)
 target_rate = '2ms'
 
 # Process each subfolder under 'dataset/'

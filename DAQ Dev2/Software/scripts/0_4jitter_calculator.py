@@ -2,7 +2,7 @@ import pandas as pd
 from pathlib import Path
 
 # Define the dataset root directory relative to this script
-dataset_root = Path(__file__).resolve().parent.parent / 'dataset_snipped'
+dataset_root = Path(__file__).resolve().parent.parent / 'dataset_short_snipped'
 
 # Find all CSV files matching the expected pattern recursively
 csv_files = list(dataset_root.rglob('data_*.csv'))
