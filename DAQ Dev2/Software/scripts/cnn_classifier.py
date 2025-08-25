@@ -28,14 +28,12 @@ callbacks = [
 X = []
 y = []
 
-selected_features = ['wavelet_approx_mean', 'wavelet_total_energy', 'wavelet_approx_energy',
-                     'wavelet_rel_energy_5', 'wavelet_rel_energy_0', 'wavelet_rel_energy_4',
-                     'wavelet_rel_energy_3', 'wavelet_rel_energy_6', 'wavelet_detail_4_energy',
-                     'wavelet_detail_4_var', 'TEMP', 'wavelet_rel_energy_2', 'wavelet_detail_4_std',
-                     'ar_coeff_2', 'wavelet_detail_5_std', 'wavelet_detail_5_var', 'welch_peak_power',
-                     'wavelet_detail_3_var', 'wavelet_approx_std', 'wavelet_approx_var',
-                     'wavelet_detail_5_energy', 'welch_total_power', 'wavelet_detail_3_energy',
-                     'welch_delta_power', 'wavelet_detail_6_std']
+selected_features = ['wavelet_approx_mean', 'wavelet_total_energy', 'wavelet_approx_energy', 'TEMP', 
+                     'wavelet_rel_energy_0', 'wavelet_rel_energy_5', 'wavelet_detail_6_std', 'welch_total_power', 
+                     'wavelet_rel_energy_6', 'welch_spectral_flux', 'wavelet_detail_6_energy', 'wavelet_detail_6_var', 
+                     'wavelet_detail_5_std', 'wavelet_detail_5_energy', 'welch_peak_power', 'wavelet_rel_energy_4', 
+                     'wavelet_detail_4_std', 'wavelet_detail_5_var', 'wavelet_detail_4_energy', 'wavelet_detail_4_var', 
+                     'wavelet_rel_energy_3', 'welch_beta_power', 'wavelet_detail_3_energy', 'ar_coeff_1', 'wavelet_detail_3_var']
 
 for sample_folder in sorted(DATA_ROOT.glob("dataset_sample_*")):
     label = int(sample_folder.name.split("_")[-1])

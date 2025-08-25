@@ -121,12 +121,12 @@ def process_single_file(file_path, output_dir_spectral, output_dir_wavelets, sam
 
 def main():
     base_dir = Path(__file__).resolve().parent.parent
-    pre_root = base_dir / 'dataset_interpolated'
+    pre_root = base_dir / 'dataset_preprocessed_with_interpolation'
     feature_root = base_dir / 'dataset_feature_extracted'
 
     dataset_id = 0
 
-    for sub in sorted(pre_root.iterdir()):
+    for sub in sorted(pre_root.iterdir()): 
         if not sub.is_dir():
             print("There is no directory as a sub folder")
             print("There is no directory as a sub folder")
