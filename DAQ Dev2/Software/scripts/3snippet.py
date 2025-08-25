@@ -2,6 +2,7 @@ from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
 import datetime
+import os
 
 class DatasetSnipper:
     def __init__(self):
@@ -22,7 +23,7 @@ class DatasetSnipper:
             print(f"Skipping {input_file.name}: Missing 'Timestamp' column")
             return
 
-        df['Timestamp'] = pd.to_datetime(df['Timestamp'])
+        df['Timestamp'] = pd.to_datetime(df['Timestamp'], errors='coerce')
 
         df['dt_raw'] = df['Timestamp'].diff().dt.total_seconds().fillna(0)
         
@@ -55,4 +56,9 @@ class DatasetSnipper:
 if __name__ == '__main__':
     snipper = DatasetSnipper()
     snipper.process_all()
-    exec(open('4interpolation_of_data.py').read())
+    
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    noise_canceling_path = os.path.join(script_dir, "4interpolation_of_data.py")
+
+    with open(noise_canceling_path) as f:
+        exec(f.read())
