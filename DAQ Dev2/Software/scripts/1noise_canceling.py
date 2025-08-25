@@ -1,5 +1,6 @@
 import pandas as pd
 from pathlib import Path
+import os
 
 # Function to load interpolated CSVs
 def load_uniform(file_path):
@@ -76,4 +77,9 @@ for sub in dataset_root.iterdir():
         print(f"Saved cleaned AMP to {out_path}")
 
 print("Noise removal (AMP only) complete.")
-#exec(open('3snippet.py').read())
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+noise_canceling_path = os.path.join(script_dir, "3snippet.py")
+
+with open(noise_canceling_path) as f:
+    exec(f.read())

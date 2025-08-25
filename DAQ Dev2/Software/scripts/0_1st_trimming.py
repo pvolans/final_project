@@ -1,5 +1,6 @@
 import pandas as pd
 from pathlib import Path
+import os
 
 # Function to load interpolated CSVs
 def load_uniform(file_path):
@@ -93,4 +94,10 @@ for sub in dataset_root.iterdir():
         out_path = out_sub / f"{f.name}"
         trimmed.to_csv(out_path, index=False, header=True)
         print(f"Saved to {out_path}")
-#exec(open('1noise_canceling.py').read())
+
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+noise_canceling_path = os.path.join(script_dir, "1noise_canceling.py")
+
+with open(noise_canceling_path) as f:
+    exec(f.read())

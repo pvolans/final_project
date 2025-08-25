@@ -1,5 +1,6 @@
 import pandas as pd
 from pathlib import Path
+import os
 
 # Get script and project roots
 script_dir = Path(__file__).resolve().parent
@@ -42,4 +43,9 @@ for sub in dataset_root.iterdir():
                 print(f"Error processing {csv_file}: {e}")
 
 print("Interpolation complete.")
-exec(open('5trim.py').read())
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+noise_canceling_path = os.path.join(script_dir, "5trim.py")
+
+with open(noise_canceling_path) as f:
+    exec(f.read())
