@@ -82,7 +82,7 @@ for sub in dataset_root.iterdir():
             print(f"Too short: {f.name}")
             continue
 
-        print(f"Processing sample {sample}, point {point}")
+        print(f"Processing sample {sample}, point {point}, id {id}")
 
         if 'AMP' not in sig.columns or 'AMP' not in sig.columns:
             print(f"AMP column missing in files; skipping {f.name}")
